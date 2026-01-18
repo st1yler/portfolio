@@ -19,6 +19,9 @@
       --border: rgba(255,255,255,0.18);
       --text: #ffffff;
       --sub: rgba(255,255,255,0.65);
+      --search-bg: rgba(255,255,255,0.05);
+      --search-border: rgba(255,255,255,0.15);
+      --search-focus: rgba(255,255,255,0.12);
     }
 
     * { box-sizing: border-box; }
@@ -41,10 +44,20 @@
       background: var(--glass);
       border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 12px 28px;
+      padding: 10px 24px;
       display: flex;
+      align-items: center;
       gap: 24px;
       z-index: 999;
+      min-width: 300px;
+      width: auto;
+      max-width: 1200px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      align-items: center;
     }
 
     nav a {
@@ -52,9 +65,164 @@
       color: var(--sub);
       font-weight: 500;
       transition: color 0.3s;
+      white-space: nowrap;
     }
 
     nav a:hover { color: #fff; }
+
+    /* Search Container */
+    .search-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .search-input {
+      background: var(--search-bg);
+      border: 1px solid var(--search-border);
+      border-radius: 999px;
+      padding: 8px 16px 8px 40px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      width: 0;
+      opacity: 0;
+      transition: all 0.3s ease;
+      outline: none;
+      min-height: 36px;
+    }
+
+    .search-input.expanded {
+      width: 220px;
+      opacity: 1;
+      margin-right: 8px;
+    }
+
+    .search-input:focus {
+      background: var(--search-focus);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--sub);
+      font-size: 14px;
+      cursor: pointer;
+      transition: color 0.3s;
+      z-index: 2;
+    }
+
+    .search-icon:hover {
+      color: #fff;
+    }
+
+    .search-close {
+      position: absolute;
+      right: 20px;
+      color: var(--sub);
+      font-size: 12px;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.1);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .search-input.expanded + .search-close {
+      opacity: 1;
+      right: 12px;
+    }
+
+    .search-close:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Search Results */
+    .search-results {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 320px;
+      background: rgba(20,20,20,0.95);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .search-results.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .search-result-item {
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .search-result-item:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .search-result-item i {
+      color: var(--sub);
+      font-size: 14px;
+      width: 20px;
+      text-align: center;
+    }
+
+    .search-result-title {
+      font-weight: 500;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .search-result-description {
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.3;
+    }
+
+    .search-result-category {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    .no-results {
+      padding: 20px;
+      text-align: center;
+      color: var(--sub);
+      font-size: 14px;
+    }
 
     section {
       max-width: 1200px;
@@ -395,6 +563,62 @@
         height: 50vh;
         min-height: 300px;
       }
+      
+      /* Nav responsive */
+      nav {
+        padding: 10px 20px;
+        gap: 16px;
+        width: 95%;
+      }
+      
+      .nav-links {
+        gap: 16px;
+      }
+      
+      .search-input.expanded {
+        width: 160px;
+      }
+      
+      .search-results {
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      
+      .nav-links {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      
+      .search-container {
+        order: 1;
+        margin-left: 0;
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .search-input.expanded {
+        width: 100%;
+      }
+      
+      .search-results {
+        width: 95%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+      }
+      
+      .search-results.active {
+        transform: translateX(-50%) translateY(0);
+      }
     }
 
     /* ===== MACOS IMAGE VIEWER ===== */
@@ -575,9 +799,28 @@
 <body>
 
 <nav>
-  <a href="#scripting">Scripting</a>
-  <a href="#modeling">Modeling</a>
+  <div class="nav-links">
+    <a href="#scripting">Scripting</a>
+    <a href="#modeling">Modeling</a>
     <a href="#contact">Contact</a>
+  </div>
+  
+  <div class="search-container">
+    <div class="search-icon" id="searchIcon">
+      <i class="fas fa-search"></i>
+    </div>
+    <input 
+      type="text" 
+      class="search-input" 
+      id="searchInput" 
+      placeholder="Search projects..." 
+      autocomplete="off"
+    >
+    <div class="search-close" id="searchClose">
+      <i class="fas fa-times"></i>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
 </nav>
 
 <section class="hero">
@@ -597,7 +840,7 @@
   
   <div class="videos-grid" id="videosGrid">
     <!-- Videos en grid 3x3 -->
-    <div class="video-card-compact" data-video-id="1151425867" data-title="Advanced Movement">
+    <div class="video-card-compact" data-video-id="1151425867" data-title="Advanced Movement" data-description="Physics-based character controller" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://player.vimeo.com/video/1151425867?badge=0&autopause=0&player_id=0&app_id=58479&background=1&autoplay=0&loop=1&byline=0&title=0"
@@ -613,7 +856,7 @@
       <div class="video-description">Physics-based character controller</div>
     </div>
 
-    <div class="video-card-compact" data-video-id="1151425774" data-title="Advanced Animation">
+    <div class="video-card-compact" data-video-id="1151425774" data-title="Advanced Animation" data-description="State machines & blending system" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://player.vimeo.com/video/1151425774?badge=0&autopause=0&player_id=0&app_id=58479&background=1&autoplay=0&loop=1&byline=0&title=0"
@@ -629,7 +872,7 @@
       <div class="video-description">State machines & blending system</div>
     </div>
 
-    <div class="video-card-compact" data-video-id="1151425881" data-title="PBZ Complete Game">
+    <div class="video-card-compact" data-video-id="1151425881" data-title="PBZ Complete Game" data-description="Ai Bossfight And Zombies, Leveling, Game modes, scallabe, easy to handle the rounds system and the diferents difficults" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://player.vimeo.com/video/1151425881?badge=0&autopause=0&player_id=0&app_id=58479&background=1&autoplay=0&loop=1&byline=0&title=0"
@@ -645,7 +888,7 @@
       <div class="video-description">Ai Bossfight And Zombies, Leveling, Game modes, scallabe, easy to handle the rounds system and the diferents difficults</div>
     </div>
 
-<div class="video-card-compact" data-video-id="1155631862" data-title="Shop UI DATASTORE">
+<div class="video-card-compact" data-video-id="1155631862" data-title="Shop UI DATASTORE" data-description="Modular Shop UI with Datastore integration and easy way to manage items" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://vimeo.com/1155631862?fl=ip&fe=ec"
@@ -662,7 +905,7 @@
     </div>
 
 
-<div class="video-card-compact" data-video-id="1155631838" data-title=" Modular Map Round System team-based">
+<div class="video-card-compact" data-video-id="1155631838" data-title="Modular Map Round System team-based" data-description="Modular map round system with easy way to manage rounds and maps, only adding the name of the map in a workspace folder, and the thumbnail in the model poperties!" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://vimeo.com/1155631838?fl=ip&fe=ec"
@@ -678,7 +921,7 @@
       <div class="video-description">Modular map round system with easy way to manage rounds and maps, only adding the name of the map in a workspace folder, and the thumbnail in the model poperties!</div>
     </div>
 
-    <div class="video-card-compact" data-video-id="1155631800" data-title="RPG Camera">
+    <div class="video-card-compact" data-video-id="1155631800" data-title="RPG Camera" data-description="Dynamic Spectate system, with filters by team and friends spectate, easy to use and add in your game , Optimized , made with only 1 script for all the plants possible!" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://vimeo.com/1155631800?fl=ip&fe=ec"
@@ -693,7 +936,7 @@
       <div class="video-title">Physics-based Smart Plants</div>
       <div class="video-description">Dynamic Spectate system, with filters by team and friends spectate, easy to use and add in your game , Optimized , made with only 1 script for all the plants possible! </div>
     </div>
-  <div class="video-card-compact" data-video-id="1155631827" data-title="RPG Camera">
+  <div class="video-card-compact" data-video-id="1155631827" data-title="RPG Camera" data-description="Dynamic Spectate system, with filters by team and friends spectate, easy to use and add in your game with your own ui style!" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://vimeo.com/1155631827?fl=ip&fe=ec"
@@ -705,11 +948,11 @@
           <i class="fas fa-play"></i>
         </div>
       </div>
-      <div class="video-title">Modular Spectate system </div>
+      <div class="video-title">Modular Spectate system</div>
       <div class="video-description">Dynamic Spectate system, with filters by team and friends spectate, easy to use and add in your game with your own ui style!</div>
     </div>
 
-    <div class="video-card-compact" data-video-id="1151425860" data-title="Dialog NPC">
+    <div class="video-card-compact" data-video-id="1151425860" data-title="Dialog NPC" data-description="Branching dialogue system" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://player.vimeo.com/video/1151425860?badge=0&autopause=0&player_id=0&app_id=58479&background=1&autoplay=0&loop=1&byline=0&title=0"
@@ -725,7 +968,7 @@
       <div class="video-description">Branching dialogue system</div>
     </div>
 
-    <div class="video-card-compact" data-video-id="1151425929" data-title="Advanced FPS Gun Framework">
+    <div class="video-card-compact" data-video-id="1151425929" data-title="Advanced FPS Gun Framework" data-description="Realistic FPS weapons with custom animations" data-category="scripting">
       <div class="video-thumbnail">
         <iframe 
           src="https://player.vimeo.com/video/1151425929?badge=0&autopause=0&player_id=0&app_id=58479&background=1&autoplay=0&loop=1&byline=0&title=0"
@@ -769,32 +1012,32 @@
   <h2>Modeling — Past Works</h2>
 
   <div class="grid">
-    <div class="card">
+    <div class="card" data-title="bundles" data-description="bundles and characters" data-category="modeling">
       <h3>bundles</h3>
       <small class="subtitle">bundles and characters</small>
-      <img src="static/modeling/bundles/bundle1.png">
-      <img src="static/modeling/bundles/bundle2.png">
-      <img src="static/modeling/bundles/bundle3.png">
-      <img src="static/modeling/bundles/bundle4.png">
-      <img src="static/modeling/bundles/bundle5.png">
+      <img src="static/modeling/bundles/bundle1.png" alt="Bundle 1">
+      <img src="static/modeling/bundles/bundle2.png" alt="Bundle 2">
+      <img src="static/modeling/bundles/bundle3.png" alt="Bundle 3">
+      <img src="static/modeling/bundles/bundle4.png" alt="Bundle 4">
+      <img src="static/modeling/bundles/bundle5.png" alt="Bundle 5">
     </div>
-    <div class="card">
+    <div class="card" data-title="mapping" data-description="mapping and housing" data-category="modeling">
       <h3>mapping</h3>
       <small class="subtitle">mapping and housing</small>
-      <img src="static/modeling/mapping/map1.png">
-      <img src="static/modeling/mapping/map2.png">
-      <img src="static/modeling/mapping/map3.png">
-      <img src="static/modeling/mapping/map4.png">
-      <img src="static/modeling/mapping/map5.png">
+      <img src="static/modeling/mapping/map1.png" alt="Map 1">
+      <img src="static/modeling/mapping/map2.png" alt="Map 2">
+      <img src="static/modeling/mapping/map3.png" alt="Map 3">
+      <img src="static/modeling/mapping/map4.png" alt="Map 4">
+      <img src="static/modeling/mapping/map5.png" alt="Map 5">
     </div>
-    <div class="card">
+    <div class="card" data-title="weapons" data-description="weapons and accessories" data-category="modeling">
       <h3>weapons</h3>
       <small class="subtitle">weapons and accessories</small>
-      <img src="static/modeling/weapons/weapon1.png">
-      <img src="static/modeling/weapons/weapon2.png">
-      <img src="static/modeling/weapons/weapon3.png">
-      <img src="static/modeling/weapons/weapon4.png">
-      <img src="static/modeling/weapons/weapon5.png">
+      <img src="static/modeling/weapons/weapon1.png" alt="Weapon 1">
+      <img src="static/modeling/weapons/weapon2.png" alt="Weapon 2">
+      <img src="static/modeling/weapons/weapon3.png" alt="Weapon 3">
+      <img src="static/modeling/weapons/weapon4.png" alt="Weapon 4">
+      <img src="static/modeling/weapons/weapon5.png" alt="Weapon 5">
     </div>
     </div>
 </section>
@@ -854,6 +1097,202 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  // Elementos del buscador
+  const searchIcon = document.getElementById('searchIcon');
+  const searchInput = document.getElementById('searchInput');
+  const searchClose = document.getElementById('searchClose');
+  const searchResults = document.getElementById('searchResults');
+  
+  // Elementos de contenido para buscar
+  const videoCards = document.querySelectorAll('.video-card-compact');
+  const modelingCards = document.querySelectorAll('#modeling .card');
+  const sectionHeadings = document.querySelectorAll('section h2');
+  
+  // Variables para control del buscador
+  let isSearchOpen = false;
+  
+  // Abrir/cerrar buscador
+  searchIcon.addEventListener('click', () => {
+    if (!isSearchOpen) {
+      openSearch();
+    } else {
+      closeSearch();
+    }
+  });
+  
+  searchClose.addEventListener('click', closeSearch);
+  
+  // Función para abrir buscador
+  function openSearch() {
+    searchInput.classList.add('expanded');
+    searchInput.focus();
+    isSearchOpen = true;
+    searchClose.style.opacity = '1';
+  }
+  
+  // Función para cerrar buscador
+  function closeSearch() {
+    searchInput.classList.remove('expanded');
+    searchInput.value = '';
+    searchResults.classList.remove('active');
+    searchResults.innerHTML = '';
+    isSearchOpen = false;
+    searchClose.style.opacity = '0';
+  }
+  
+  // Buscar mientras se escribe
+  searchInput.addEventListener('input', performSearch);
+  
+  // Función de búsqueda
+  function performSearch() {
+    const query = searchInput.value.trim().toLowerCase();
+    
+    if (query.length === 0) {
+      searchResults.classList.remove('active');
+      searchResults.innerHTML = '';
+      return;
+    }
+    
+    const results = [];
+    
+    // Buscar en videos
+    videoCards.forEach(card => {
+      const title = card.getAttribute('data-title').toLowerCase();
+      const description = card.getAttribute('data-description').toLowerCase();
+      const category = card.getAttribute('data-category');
+      
+      if (title.includes(query) || description.includes(query)) {
+        results.push({
+          element: card,
+          title: card.getAttribute('data-title'),
+          description: card.getAttribute('data-description'),
+          category: 'Scripting',
+          type: 'video',
+          icon: 'fas fa-play-circle'
+        });
+      }
+    });
+    
+    // Buscar en modeling cards
+    modelingCards.forEach(card => {
+      const title = card.getAttribute('data-title').toLowerCase();
+      const description = card.getAttribute('data-description').toLowerCase();
+      const category = card.getAttribute('data-category');
+      
+      if (title.includes(query) || description.includes(query)) {
+        results.push({
+          element: card,
+          title: card.getAttribute('data-title'),
+          description: card.getAttribute('data-description'),
+          category: 'Modeling',
+          type: 'modeling',
+          icon: 'fas fa-cube'
+        });
+      }
+    });
+    
+    // Buscar en secciones
+    sectionHeadings.forEach(heading => {
+      const text = heading.textContent.toLowerCase();
+      if (text.includes(query)) {
+        const section = heading.closest('section');
+        results.push({
+          element: section,
+          title: heading.textContent,
+          description: `Jump to ${heading.textContent} section`,
+          category: 'Section',
+          type: 'section',
+          icon: 'fas fa-hashtag'
+        });
+      }
+    });
+    
+    // Mostrar resultados
+    displaySearchResults(results, query);
+  }
+  
+  // Mostrar resultados en el dropdown
+  function displaySearchResults(results, query) {
+    if (results.length === 0) {
+      searchResults.innerHTML = `
+        <div class="no-results">
+          <i class="fas fa-search" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+          <div>No results found for "${query}"</div>
+          <small style="opacity: 0.7; margin-top: 5px;">Try different keywords</small>
+        </div>
+      `;
+      searchResults.classList.add('active');
+      return;
+    }
+    
+    let html = '';
+    
+    results.forEach((result, index) => {
+      html += `
+        <div class="search-result-item" data-index="${index}">
+          <i class="${result.icon}"></i>
+          <div>
+            <div class="search-result-title">${highlightText(result.title, query)}</div>
+            <div class="search-result-description">${highlightText(result.description.substring(0, 80), query)}${result.description.length > 80 ? '...' : ''}</div>
+            <div class="search-result-category">${result.category}</div>
+          </div>
+        </div>
+      `;
+    });
+    
+    searchResults.innerHTML = html;
+    searchResults.classList.add('active');
+    
+    // Añadir event listeners a los resultados
+    document.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const index = item.getAttribute('data-index');
+        const result = results[index];
+        
+        if (result.type === 'video') {
+          // Simular click en el video card
+          result.element.click();
+        } else if (result.type === 'section') {
+          // Scroll a la sección
+          result.element.scrollIntoView({ behavior: 'smooth' });
+        } else if (result.type === 'modeling') {
+          // Scroll a la card de modeling
+          result.element.scrollIntoView({ behavior: 'smooth' });
+          // Efecto visual
+          result.element.style.boxShadow = '0 0 0 2px rgba(255,255,255,0.3)';
+          setTimeout(() => {
+            result.element.style.boxShadow = '';
+          }, 2000);
+        }
+        
+        closeSearch();
+      });
+    });
+  }
+  
+  // Resaltar texto en los resultados
+  function highlightText(text, query) {
+    if (!query) return text;
+    
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<span style="color: #fff; background: rgba(255,255,255,0.1); padding: 0 2px; border-radius: 2px;">$1</span>');
+  }
+  
+  // Cerrar buscador al hacer clic fuera
+  document.addEventListener('click', (e) => {
+    if (!searchContainer.contains(e.target) && isSearchOpen) {
+      closeSearch();
+    }
+  });
+  
+  // Cerrar con ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isSearchOpen) {
+      closeSearch();
+    }
+  });
+  
+  // Código original para modales de video e imágenes (mantenido)
   const modal = document.getElementById('imageModal');
   const modalImg = document.getElementById('modalImage');
   const closeBtn = document.getElementById('closeModal');
@@ -867,8 +1306,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let isFullscreen = false;
 
   // Configurar videos en grid
-  const videoCards = document.querySelectorAll('.video-card-compact');
-  
   videoCards.forEach(card => {
     const videoId = card.getAttribute('data-video-id');
     const title = card.getAttribute('data-title');
@@ -1036,5 +1473,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 </body>
-
 </html>
