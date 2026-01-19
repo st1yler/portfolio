@@ -1,473 +1,474 @@
-// 3D Viewer Application
-class ThreeJSViewer {
-    constructor() {
-        this.scene = null;
-        this.camera = null;
-        this.renderer = null;
-        this.controls = null;
-        this.currentModel = null;
-        this.models = [];
-        this.currentCategory = 'all';
-        this.wireframeEnabled = false;
-        this.gridEnabled = true;
-        this.axesEnabled = true;
-        this.lightsEnabled = true;
-        
-        // Model configurations
-        this.modelConfigs = {
-            'b': { name: 'Building', icon: 'fa-building', color: '#6366f1' },
-            'c': { name: 'Character', icon: 'fa-user', color: '#10b981' },
-            'p': { name: 'Prop', icon: 'fa-cube', color: '#f59e0b' },
-            'w': { name: 'Weapon', icon: 'fa-gun', color: '#ef4444' }
-        };
-        
-        // Initialize
-        this.init();
+// js/3d-viewer.js
+
+let scene, camera, renderer, controls, model = null;
+let wireframe = false;
+let showLights = true;
+let showGrid = true;
+let showAxes = true;
+
+// Model database - AJUSTA ESTAS RUTAS A TUS MODELOS
+const modelsDatabase = [
+    {
+        id: 1,
+        name: "Modern Building",
+        description: "Contemporary architectural design with clean lines",
+        category: "b",
+        fileName: "static/models/buildings/building1.glb",
+        thumbnail: "static/modeling/Buildings/building1.png",
+        scale: 1.0,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    },
+    {
+        id: 2,
+        name: "Japanese House",
+        description: "Traditional Japanese architecture with sliding doors",
+        category: "b",
+        fileName: "static/models/buildings/japanese_house.glb",
+        thumbnail: "static/modeling/Japanese/japanese1.png",
+        scale: 0.8,
+        position: { x: 0, y: -0.5, z: 0 },
+        rotation: { x: 0, y: Math.PI/4, z: 0 }
+    },
+    {
+        id: 3,
+        name: "Sci-Fi Character",
+        description: "Futuristic character with armor and detailed textures",
+        category: "c",
+        fileName: "static/models/characters/scifi_character.glb",
+        thumbnail: "static/modeling/bundles/bundle1.png",
+        scale: 1.2,
+        position: { x: 0, y: -1, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    },
+    {
+        id: 4,
+        name: "Fantasy Warrior",
+        description: "Medieval warrior with sword and shield",
+        category: "c",
+        fileName: "static/models/characters/warrior.glb",
+        thumbnail: "static/modeling/bundles/bundle2.png",
+        scale: 1.0,
+        position: { x: 0, y: -0.8, z: 0 },
+        rotation: { x: 0, y: Math.PI/2, z: 0 }
+    },
+    {
+        id: 5,
+        name: "Assault Rifle",
+        description: "Modern military weapon with detailed mechanics",
+        category: "w",
+        fileName: "static/models/weapons/assault_rifle.glb",
+        thumbnail: "static/modeling/weapons/weapon1.png",
+        scale: 0.5,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: Math.PI/2, y: 0, z: 0 }
+    },
+    {
+        id: 6,
+        name: "Sword",
+        description: "Medieval sword with intricate handle design",
+        category: "w",
+        fileName: "static/models/weapons/sword.glb",
+        thumbnail: "static/modeling/weapons/weapon2.png",
+        scale: 0.3,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: Math.PI/4, z: 0 }
+    },
+    {
+        id: 7,
+        name: "Barrel Prop",
+        description: "Wooden barrel for environment decoration",
+        category: "p",
+        fileName: "static/models/props/barrel.glb",
+        thumbnail: "static/modeling/mapping/map1.png",
+        scale: 0.7,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 }
+    },
+    {
+        id: 8,
+        name: "Crate",
+        description: "Wooden crate for storage and environment",
+        category: "p",
+        fileName: "static/models/props/crate.glb",
+        thumbnail: "static/modeling/mapping/map2.png",
+        scale: 0.6,
+        position: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: Math.PI/6, z: 0 }
     }
+];
+
+function init3DViewer() {
+    initScene();
+    initLights();
+    initGrid();
+    initAxes();
+    loadModelsList();
+    setupEventListeners();
+    animate();
     
-    init() {
-        this.initScene();
-        this.initCamera();
-        this.initRenderer();
-        this.initControls();
-        this.initLights();
-        this.initHelpers();
-        this.initEventListeners();
-        this.loadModelList();
-        this.animate();
-    }
+    // Show welcome notification
+    showNotification("Welcome to 3D Model Viewer! Select a model from the sidebar.");
+}
+
+function initScene() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a0f);
     
-    initScene() {
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x05050a);
-        this.scene.fog = new THREE.Fog(0x05050a, 10, 50);
-    }
+    // Camera
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 3, 5);
     
-    initCamera() {
-        this.camera = new THREE.PerspectiveCamera(
-            60,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-        );
-        this.camera.position.set(5, 5, 5);
-        this.camera.lookAt(0, 0, 0);
-    }
+    // Renderer
+    const canvas = document.getElementById('modelCanvas');
+    renderer = new THREE.WebGLRenderer({ 
+        canvas: canvas,
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(canvas.parentElement.clientWidth, canvas.parentElement.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     
-    initRenderer() {
-        const canvas = document.getElementById('modelCanvas');
-        this.renderer = new THREE.WebGLRenderer({ 
-            canvas,
-            antialias: true,
-            alpha: true
-        });
-        this.renderer.setPixelRatio(window.devicePixelRatio);
-        this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1;
-    }
+    // OrbitControls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 1;
+    controls.maxDistance = 20;
+    controls.maxPolarAngle = Math.PI;
     
-    initControls() {
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.05;
-        this.controls.screenSpacePanning = false;
-        this.controls.minDistance = 1;
-        this.controls.maxDistance = 100;
-        this.controls.maxPolarAngle = Math.PI;
-    }
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize);
+}
+
+function initLights() {
+    // Ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
     
-    initLights() {
-        // Ambient light
-        this.ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        this.scene.add(this.ambientLight);
-        
-        // Directional light
-        this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        this.directionalLight.position.set(10, 10, 10);
-        this.directionalLight.castShadow = true;
-        this.directionalLight.shadow.mapSize.width = 2048;
-        this.directionalLight.shadow.mapSize.height = 2048;
-        this.scene.add(this.directionalLight);
-        
-        // Hemisphere light
-        this.hemisphereLight = new THREE.HemisphereLight(0x4444ff, 0xff4444, 0.3);
-        this.scene.add(this.hemisphereLight);
-    }
+    // Directional light (main light)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 7);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.camera.left = -10;
+    directionalLight.shadow.camera.right = 10;
+    directionalLight.shadow.camera.top = 10;
+    directionalLight.shadow.camera.bottom = -10;
+    scene.add(directionalLight);
     
-    initHelpers() {
-        // Grid helper
-        this.gridHelper = new THREE.GridHelper(20, 20, 0x888888, 0x444444);
-        this.gridHelper.position.y = -0.01;
-        this.scene.add(this.gridHelper);
-        
-        // Axes helper
-        this.axesHelper = new THREE.AxesHelper(5);
-        this.scene.add(this.axesHelper);
-    }
+    // Hemisphere light for sky/ground effect
+    const hemisphereLight = new THREE.HemisphereLight(0x4488ff, 0x002244, 0.3);
+    scene.add(hemisphereLight);
+}
+
+function initGrid() {
+    const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+    gridHelper.position.y = -0.01; // Slightly below ground to avoid z-fighting
+    scene.add(gridHelper);
+    gridHelper.visible = showGrid;
+}
+
+function initAxes() {
+    const axesHelper = new THREE.AxesHelper(5);
+    scene.add(axesHelper);
+    axesHelper.visible = showAxes;
+}
+
+function loadModelsList() {
+    const modelList = document.getElementById('modelList');
+    modelList.innerHTML = '';
     
-    initEventListeners() {
-        window.addEventListener('resize', () => this.onWindowResize());
-        
-        // Control buttons
-        document.getElementById('resetView').addEventListener('click', () => this.resetView());
-        document.getElementById('toggleWireframe').addEventListener('click', () => this.toggleWireframe());
-        document.getElementById('toggleLights').addEventListener('click', () => this.toggleLights());
-        document.getElementById('toggleGrid').addEventListener('click', () => this.toggleGrid());
-        document.getElementById('toggleAxes').addEventListener('click', () => this.toggleAxes());
-        
-        // Zoom controls
-        document.getElementById('zoomIn').addEventListener('click', () => this.zoom(0.8));
-        document.getElementById('zoomOut').addEventListener('click', () => this.zoom(1.2));
-        
-        // Rotation controls
-        document.getElementById('rotateLeft').addEventListener('click', () => this.rotateModel(Math.PI / 8));
-        document.getElementById('rotateRight').addEventListener('click', () => this.rotateModel(-Math.PI / 8));
-        
-        // Category filters
-        document.querySelectorAll('.category').forEach(category => {
-            category.addEventListener('click', (e) => {
-                const categoryEl = e.currentTarget;
-                const category = categoryEl.dataset.category;
-                this.filterModels(category);
-                
-                // Update active category
-                document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
-                categoryEl.classList.add('active');
-            });
-        });
-        
-        // Close notification
-        document.getElementById('closeNotification').addEventListener('click', () => {
-            this.hideNotification();
-        });
-    }
+    // Count models per category
+    const counts = { all: modelsDatabase.length };
+    ['b', 'c', 'p', 'w'].forEach(cat => {
+        counts[cat] = modelsDatabase.filter(m => m.category === cat).length;
+        document.getElementById(`count-${cat}`).textContent = counts[cat];
+    });
+    document.getElementById('count-all').textContent = counts.all;
     
-    async loadModelList() {
-        try {
-            // In a real implementation, you would fetch this from a server
-            // For now, we'll simulate loading with setTimeout
-            setTimeout(() => {
-                // Simulated model data - in reality, you would scan your static/models folder
-                this.models = [
-                    { id: 'b1', name: 'Modern Building', category: 'b', size: '2.4 MB', format: 'glb' },
-                    { id: 'b2', name: 'Medieval Castle', category: 'b', size: '3.1 MB', format: 'glb' },
-                    { id: 'c1', name: 'Robot Character', category: 'c', size: '1.8 MB', format: 'glb' },
-                    { id: 'c2', name: 'Fantasy Warrior', category: 'c', size: '2.2 MB', format: 'glb' },
-                    { id: 'p1', name: 'Sci-fi Crate', category: 'p', size: '0.8 MB', format: 'glb' },
-                    { id: 'p2', name: 'Barrel Prop', category: 'p', size: '0.6 MB', format: 'glb' },
-                    { id: 'w1', name: 'Laser Rifle', category: 'w', size: '1.2 MB', format: 'glb' },
-                    { id: 'w2', name: 'Sword', category: 'w', size: '0.9 MB', format: 'glb' }
-                ];
-                
-                this.updateModelList();
-                this.showNotification('Models loaded successfully', 'success');
-            }, 1000);
-            
-        } catch (error) {
-            console.error('Error loading model list:', error);
-            this.showNotification('Error loading models', 'error');
-        }
-    }
-    
-    updateModelList() {
-        const modelList = document.getElementById('modelList');
-        const filteredModels = this.currentCategory === 'all' 
-            ? this.models 
-            : this.models.filter(model => model.category === this.currentCategory);
+    // Create model cards
+    modelsDatabase.forEach(modelData => {
+        const modelCard = document.createElement('div');
+        modelCard.className = 'model-card';
+        modelCard.dataset.id = modelData.id;
+        modelCard.dataset.category = modelData.category;
         
-        // Update counts
-        Object.keys(this.modelConfigs).forEach(category => {
-            const count = this.models.filter(m => m.category === category).length;
-            document.getElementById(`count-${category}`).textContent = count;
-        });
-        document.getElementById('count-all').textContent = this.models.length;
-        
-        // Clear list
-        modelList.innerHTML = '';
-        
-        if (filteredModels.length === 0) {
-            modelList.innerHTML = `
-                <div class="no-models">
-                    <i class="fas fa-box-open"></i>
-                    <span>No models found in this category</span>
+        modelCard.innerHTML = `
+            <div class="model-card-thumbnail">
+                <img src="${modelData.thumbnail || 'assets/default-thumbnail.jpg'}" 
+                     alt="${modelData.name}"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><text x=%2250%22 y=%2260%22 font-family=%22Arial%22 font-size=%2214%22 fill=%22%23fff%22 text-anchor=%22middle%22>3D</text></svg>'">
+            </div>
+            <div class="model-card-info">
+                <h4>${modelData.name}</h4>
+                <p>${modelData.description}</p>
+                <div class="model-card-meta">
+                    <span class="model-category">${getCategoryName(modelData.category)}</span>
+                    <span class="model-size">${modelData.fileName.split('.').pop().toUpperCase()}</span>
                 </div>
-            `;
-            return;
-        }
+            </div>
+        `;
         
-        // Add models to list
-        filteredModels.forEach(model => {
-            const config = this.modelConfigs[model.category];
-            const modelEl = document.createElement('div');
-            modelEl.className = 'model-item';
-            modelEl.dataset.modelId = model.id;
-            modelEl.dataset.category = model.category;
-            
-            modelEl.innerHTML = `
-                <div class="model-icon" style="background: rgba(${this.hexToRgb(config.color)}, 0.1);">
-                    <i class="fas ${config.icon}" style="color: ${config.color};"></i>
-                </div>
-                <div class="model-info">
-                    <div class="model-name">${model.name}</div>
-                    <div class="model-category">${config.name}</div>
-                </div>
-                <div class="model-size">${model.size}</div>
-            `;
-            
-            modelEl.addEventListener('click', () => this.loadModel(model.id));
-            modelList.appendChild(modelEl);
-        });
+        modelCard.addEventListener('click', () => loadModel(modelData));
+        modelList.appendChild(modelCard);
+    });
+}
+
+function getCategoryName(categoryCode) {
+    const categories = {
+        'b': 'Building',
+        'c': 'Character',
+        'p': 'Prop',
+        'w': 'Weapon'
+    };
+    return categories[categoryCode] || 'Other';
+}
+
+function loadModel(modelData) {
+    showLoading(true);
+    
+    // Remove previous model
+    if (model) {
+        scene.remove(model);
+        model = null;
     }
     
-    filterModels(category) {
-        this.currentCategory = category;
-        this.updateModelList();
-    }
+    // Update UI
+    document.getElementById('modelTitle').textContent = modelData.name;
+    document.getElementById('modelDescription').textContent = modelData.description;
     
-    async loadModel(modelId) {
-        const model = this.models.find(m => m.id === modelId);
-        if (!model) {
-            this.showNotification('Model not found', 'error');
-            return;
-        }
-        
-        // Show loading overlay
-        this.showLoading(true);
-        
-        try {
-            // Remove current model
-            if (this.currentModel) {
-                this.scene.remove(this.currentModel);
-                this.currentModel = null;
-            }
+    document.getElementById('detailFileName').textContent = modelData.fileName.split('/').pop();
+    document.getElementById('detailCategory').textContent = getCategoryName(modelData.category);
+    document.getElementById('detailTextures').textContent = 'Yes';
+    document.getElementById('detailAnimations').textContent = 'None';
+    document.getElementById('detailLoaded').textContent = new Date().toLocaleTimeString();
+    
+    // Load the 3D model
+    const loader = new THREE.GLTFLoader();
+    
+    // Optional: Add DRACO decompression support
+    // const dracoLoader = new THREE.DRACOLoader();
+    // dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    // loader.setDRACOLoader(dracoLoader);
+    
+    loader.load(
+        modelData.fileName,
+        (gltf) => {
+            model = gltf.scene;
             
-            // In a real implementation, you would load the actual model file
-            // For demo purposes, we'll create a placeholder mesh
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Scale and position
+            model.scale.set(modelData.scale, modelData.scale, modelData.scale);
+            model.position.set(modelData.position.x, modelData.position.y, modelData.position.z);
+            model.rotation.set(modelData.rotation.x, modelData.rotation.y, modelData.rotation.z);
             
-            const geometry = this.createDemoGeometry(model.category);
-            const material = new THREE.MeshStandardMaterial({ 
-                color: this.hexToRgb(this.modelConfigs[model.category].color),
-                metalness: 0.3,
-                roughness: 0.7
-            });
-            
-            this.currentModel = new THREE.Mesh(geometry, material);
-            this.currentModel.castShadow = true;
-            this.currentModel.receiveShadow = true;
-            
-            // Scale based on category
-            let scale = 1;
-            switch(model.category) {
-                case 'b': scale = 0.5; break;
-                case 'c': scale = 1; break;
-                case 'p': scale = 2; break;
-                case 'w': scale = 3; break;
-            }
-            this.currentModel.scale.set(scale, scale, scale);
-            
-            this.scene.add(this.currentModel);
-            
-            // Update UI
-            this.updateModelDetails(model);
-            
-            // Highlight selected model in list
-            document.querySelectorAll('.model-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.modelId === modelId) {
-                    item.classList.add('active');
+            // Enable shadows
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                    
+                    // Apply wireframe if enabled
+                    if (wireframe) {
+                        child.material.wireframe = true;
+                    }
                 }
             });
             
-            // Reset camera to focus on model
-            this.resetView();
+            scene.add(model);
             
-            this.showNotification(`Model "${model.name}" loaded`, 'success');
+            // Calculate stats
+            let vertices = 0;
+            let faces = 0;
             
-        } catch (error) {
-            console.error('Error loading model:', error);
-            this.showNotification('Error loading model', 'error');
-        } finally {
-            this.showLoading(false);
-        }
-    }
-    
-    createDemoGeometry(category) {
-        switch(category) {
-            case 'b':
-                return new THREE.BoxGeometry(2, 3, 2);
-            case 'c':
-                const body = new THREE.CylinderGeometry(0.5, 0.3, 2, 8);
-                const head = new THREE.SphereGeometry(0.4, 16, 16);
-                head.translate(0, 1.5, 0);
-                return new THREE.BufferGeometry().fromGeometry(body);
-            case 'p':
-                return new THREE.CylinderGeometry(0.8, 0.8, 1, 16);
-            case 'w':
-                const handle = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
-                const barrel = new THREE.CylinderGeometry(0.15, 0.15, 2, 8);
-                barrel.translate(0, 0, 1);
-                return new THREE.BufferGeometry().fromGeometry(handle);
-            default:
-                return new THREE.BoxGeometry(1, 1, 1);
-        }
-    }
-    
-    updateModelDetails(model) {
-        document.getElementById('modelTitle').textContent = model.name;
-        document.getElementById('modelDescription').textContent = `3D Model - ${this.modelConfigs[model.category].name}`;
-        
-        document.getElementById('detailFileName').textContent = `${model.id}.${model.format}`;
-        document.getElementById('detailCategory').textContent = this.modelConfigs[model.category].name;
-        document.getElementById('detailFormat').textContent = model.format.toUpperCase();
-        document.getElementById('detailTextures').textContent = 'Yes';
-        document.getElementById('detailAnimations').textContent = 'No';
-        document.getElementById('detailLoaded').textContent = new Date().toLocaleTimeString();
-        
-        // Update stats (simulated)
-        const vertices = Math.floor(Math.random() * 5000) + 1000;
-        const faces = Math.floor(vertices / 3);
-        document.getElementById('vertexCount').textContent = vertices.toLocaleString();
-        document.getElementById('faceCount').textContent = faces.toLocaleString();
-        document.getElementById('modelScale').textContent = '1.0x';
-    }
-    
-    resetView() {
-        if (this.currentModel) {
-            this.controls.reset();
-            this.camera.position.set(5, 5, 5);
-            this.camera.lookAt(0, 0, 0);
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    vertices += child.geometry.attributes.position.count;
+                    faces += child.geometry.index ? child.geometry.index.count / 3 : child.geometry.attributes.position.count / 3;
+                }
+            });
             
-            // Center model
-            const box = new THREE.Box3().setFromObject(this.currentModel);
+            document.getElementById('vertexCount').textContent = vertices.toLocaleString();
+            document.getElementById('faceCount').textContent = faces.toLocaleString();
+            document.getElementById('modelScale').textContent = `${modelData.scale}x`;
+            
+            // Focus camera on model
+            const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
             const size = box.getSize(new THREE.Vector3());
             
             const maxDim = Math.max(size.x, size.y, size.z);
-            const fov = this.camera.fov * (Math.PI / 180);
+            const fov = camera.fov * (Math.PI / 180);
             let cameraZ = Math.abs(maxDim / Math.tan(fov / 2));
             
-            this.camera.position.copy(center);
-            this.camera.position.z += cameraZ * 1.5;
-            this.controls.target.copy(center);
-            this.controls.update();
-        }
-    }
-    
-    toggleWireframe() {
-        if (this.currentModel) {
-            this.wireframeEnabled = !this.wireframeEnabled;
-            this.currentModel.material.wireframe = this.wireframeEnabled;
+            camera.position.copy(center);
+            camera.position.z += cameraZ * 1.5;
+            camera.lookAt(center);
+            controls.target.copy(center);
+            controls.update();
             
-            const btn = document.getElementById('toggleWireframe');
-            btn.classList.toggle('active', this.wireframeEnabled);
-            btn.innerHTML = this.wireframeEnabled 
-                ? '<i class="fas fa-th"></i> Solid' 
-                : '<i class="fas fa-th"></i> Wireframe';
+            showLoading(false);
+            showNotification(`Loaded: ${modelData.name}`);
+            
+            // Update active model card
+            document.querySelectorAll('.model-card').forEach(card => {
+                card.classList.remove('active');
+                if (parseInt(card.dataset.id) === modelData.id) {
+                    card.classList.add('active');
+                }
+            });
+        },
+        (progress) => {
+            // Loading progress
+            const percent = (progress.loaded / progress.total * 100).toFixed(1);
+            document.querySelector('.loader-text').textContent = `Loading Model... ${percent}%`;
+        },
+        (error) => {
+            console.error('Error loading model:', error);
+            showLoading(false);
+            showNotification('Error loading model. Please check console.', 'error');
+            
+            // Create placeholder cube
+            const geometry = new THREE.BoxGeometry(2, 2, 2);
+            const material = new THREE.MeshStandardMaterial({ 
+                color: 0x6366f1,
+                wireframe: true
+            });
+            model = new THREE.Mesh(geometry, material);
+            scene.add(model);
         }
-    }
-    
-    toggleLights() {
-        this.lightsEnabled = !this.lightsEnabled;
-        this.ambientLight.visible = this.lightsEnabled;
-        this.directionalLight.visible = this.lightsEnabled;
-        this.hemisphereLight.visible = this.lightsEnabled;
-        
-        const btn = document.getElementById('toggleLights');
-        btn.classList.toggle('active', this.lightsEnabled);
-    }
-    
-    toggleGrid() {
-        this.gridEnabled = !this.gridEnabled;
-        this.gridHelper.visible = this.gridEnabled;
-        
-        const btn = document.getElementById('toggleGrid');
-        btn.classList.toggle('active', this.gridEnabled);
-    }
-    
-    toggleAxes() {
-        this.axesEnabled = !this.axesEnabled;
-        this.axesHelper.visible = this.axesEnabled;
-        
-        const btn = document.getElementById('toggleAxes');
-        btn.classList.toggle('active', this.axesEnabled);
-    }
-    
-    zoom(factor) {
-        this.camera.position.multiplyScalar(factor);
-        this.controls.update();
-    }
-    
-    rotateModel(angle) {
-        if (this.currentModel) {
-            this.currentModel.rotation.y += angle;
-        }
-    }
-    
-    showLoading(show) {
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.style.display = show ? 'flex' : 'none';
-    }
-    
-    showNotification(message, type = 'info') {
-        const notification = document.getElementById('notification');
-        const text = document.getElementById('notificationText');
-        
-        text.textContent = message;
-        notification.className = `notification show ${type}`;
-        
-        // Auto hide after 5 seconds
-        setTimeout(() => this.hideNotification(), 5000);
-    }
-    
-    hideNotification() {
-        const notification = document.getElementById('notification');
-        notification.classList.remove('show');
-    }
-    
-    hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : null;
-    }
-    
-    onWindowResize() {
-        const canvas = document.getElementById('modelCanvas');
-        this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    }
-    
-    animate() {
-        requestAnimationFrame(() => this.animate());
-        
-        if (this.controls) {
-            this.controls.update();
-        }
-        
-        // Rotate model slowly if auto-rotate is enabled
-        if (this.currentModel) {
-            this.currentModel.rotation.y += 0.001;
-        }
-        
-        this.renderer.render(this.scene, this.camera);
-    }
+    );
 }
 
-// Initialize the 3D viewer
-function init3DViewer() {
-    window.viewer = new ThreeJSViewer();
+function showLoading(show) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    loadingOverlay.style.display = show ? 'flex' : 'none';
 }
 
-// Handle window resize
-window.addEventListener('resize', function() {
-    if (window.viewer) {
-        window.viewer.onWindowResize();
-    }
-});
+function showNotification(message, type = 'info') {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    notification.className = `notification ${type}`;
+    notification.style.display = 'flex';
+    
+    setTimeout(() => {
+        notification.style.display = 'none';
+    }, 5000);
+}
+
+function setupEventListeners() {
+    // Category filtering
+    document.querySelectorAll('.category').forEach(category => {
+        category.addEventListener('click', () => {
+            const categoryType = category.dataset.category;
+            
+            // Update active category
+            document.querySelectorAll('.category').forEach(c => c.classList.remove('active'));
+            category.classList.add('active');
+            
+            // Filter model cards
+            document.querySelectorAll('.model-card').forEach(card => {
+                if (categoryType === 'all' || card.dataset.category === categoryType) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+    
+    // Control buttons
+    document.getElementById('resetView').addEventListener('click', () => {
+        camera.position.set(5, 3, 5);
+        controls.target.set(0, 0, 0);
+        controls.update();
+    });
+    
+    document.getElementById('toggleWireframe').addEventListener('click', () => {
+        wireframe = !wireframe;
+        if (model) {
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.wireframe = wireframe;
+                }
+            });
+        }
+        showNotification(wireframe ? 'Wireframe enabled' : 'Wireframe disabled');
+    });
+    
+    document.getElementById('toggleLights').addEventListener('click', () => {
+        showLights = !showLights;
+        scene.traverse((child) => {
+            if (child.isLight) {
+                child.visible = showLights;
+            }
+        });
+        showNotification(showLights ? 'Lights enabled' : 'Lights disabled');
+    });
+    
+    document.getElementById('toggleGrid').addEventListener('click', () => {
+        showGrid = !showGrid;
+        scene.traverse((child) => {
+            if (child.isGridHelper) {
+                child.visible = showGrid;
+            }
+        });
+        showNotification(showGrid ? 'Grid enabled' : 'Grid disabled');
+    });
+    
+    document.getElementById('toggleAxes').addEventListener('click', () => {
+        showAxes = !showAxes;
+        scene.traverse((child) => {
+            if (child.isAxesHelper) {
+                child.visible = showAxes;
+            }
+        });
+        showNotification(showAxes ? 'Axes enabled' : 'Axes disabled');
+    });
+    
+    // Zoom controls
+    document.getElementById('zoomIn').addEventListener('click', () => {
+        camera.position.multiplyScalar(0.9);
+    });
+    
+    document.getElementById('zoomOut').addEventListener('click', () => {
+        camera.position.multiplyScalar(1.1);
+    });
+    
+    // Rotation controls
+    document.getElementById('rotateLeft').addEventListener('click', () => {
+        if (model) {
+            model.rotation.y += Math.PI / 8;
+        }
+    });
+    
+    document.getElementById('rotateRight').addEventListener('click', () => {
+        if (model) {
+            model.rotation.y -= Math.PI / 8;
+        }
+    });
+    
+    // Close notification
+    document.getElementById('closeNotification').addEventListener('click', () => {
+        document.getElementById('notification').style.display = 'none';
+    });
+}
+
+function onWindowResize() {
+    const canvas = document.getElementById('modelCanvas');
+    const container = canvas.parentElement;
+    
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
