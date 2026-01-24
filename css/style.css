@@ -1,37 +1,37 @@
 /* ===== BASE STYLES ===== */
 :root {
-  /* Colors - Dark Theme (default) */
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #11111f;
-  --bg-card: #1a1a2e;
-  --bg-glass: rgba(255, 255, 255, 0.03);
-  --bg-glass-heavy: rgba(255, 255, 255, 0.08);
+  /* Colors - White & Black Theme */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(0, 0, 0, 0.03);
+  --bg-glass-heavy: rgba(0, 0, 0, 0.08);
   
-  --text-primary: #ffffff;
-  --text-secondary: #b0b0d0;
-  --text-muted: #8888aa;
+  --text-primary: #000000;
+  --text-secondary: #444444;
+  --text-muted: #777777;
   
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-dark: #4f46e5;
+  --primary: #333333;
+  --primary-light: #555555;
+  --primary-dark: #111111;
   
-  --accent: #10b981;
-  --accent-light: #34d399;
+  --accent: #666666;
+  --accent-light: #888888;
   
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.03);
-  --border-heavy: rgba(255, 255, 255, 0.15);
+  --border: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.05);
+  --border-heavy: rgba(0, 0, 0, 0.2);
   
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --gradient-accent: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
-  --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --gradient-primary: linear-gradient(135deg, #333333 0%, #666666 100%);
+  --gradient-accent: linear-gradient(135deg, #444444 0%, #777777 100%);
+  --gradient-dark: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
   
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
-  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
   
   /* Borders */
   --radius-sm: 6px;
@@ -50,27 +50,38 @@
   --space-3xl: 56px;
 }
 
-/* Light Theme */
-[data-theme="light"] {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-glass: rgba(0, 0, 0, 0.02);
-  --bg-glass-heavy: rgba(0, 0, 0, 0.05);
+/* Dark Mode - Black & White Theme */
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #111111;
+  --bg-card: #222222;
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --bg-glass-heavy: rgba(255, 255, 255, 0.1);
   
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
+  --text-primary: #ffffff;
+  --text-secondary: #bbbbbb;
+  --text-muted: #888888;
   
-  --border: rgba(0, 0, 0, 0.06);
-  --border-light: rgba(0, 0, 0, 0.03);
-  --border-heavy: rgba(0, 0, 0, 0.1);
+  --primary: #cccccc;
+  --primary-light: #eeeeee;
+  --primary-dark: #aaaaaa;
   
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.07);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+  --accent: #999999;
+  --accent-light: #bbbbbb;
+  
+  --border: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --border-heavy: rgba(255, 255, 255, 0.2);
+  
+  --gradient-primary: linear-gradient(135deg, #cccccc 0%, #999999 100%);
+  --gradient-accent: linear-gradient(135deg, #aaaaaa 0%, #777777 100%);
+  --gradient-dark: linear-gradient(135deg, #222222 0%, #333333 100%);
+  
+  --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.05);
+  --shadow-md: 0 4px 6px rgba(255, 255, 255, 0.07);
+  --shadow-lg: 0 10px 15px rgba(255, 255, 255, 0.1);
+  --shadow-xl: 0 20px 25px rgba(255, 255, 255, 0.15);
+  --shadow-2xl: 0 25px 50px rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -96,7 +107,7 @@ body {
 }
 
 ::selection {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(51, 51, 51, 0.2);
   color: var(--text-primary);
 }
 
@@ -200,12 +211,12 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--gradient-primary);
   color: white;
   border: none;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  box-shadow: 0 4px 12px rgba(51, 51, 51, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 8px 20px rgba(51, 51, 51, 0.3);
 }
 
 .btn-outline {
@@ -464,8 +475,8 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 50%, rgba(51, 51, 51, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(102, 102, 102, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -582,9 +593,9 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1.2);
 }
 
-.dot.red { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green { background: #27c93f; }
+.dot.red { background: #555555; }
+.dot.yellow { background: #888888; }
+.dot.green { background: #aaaaaa; }
 
 .code-title {
   color: var(--text-secondary);
@@ -608,17 +619,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .code-content::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: var(--radius-full);
 }
 
 .code-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: var(--radius-full);
 }
 
 .code-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .code-content pre {
@@ -632,11 +643,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-secondary);
 }
 
-.code-content .keyword { color: #ff79c6; }
-.code-content .function { color: #50fa7b; }
-.code-content .string { color: #f1fa8c; }
-.code-content .comment { color: #6272a4; font-style: italic; }
-.code-content .number { color: #bd93f9; }
+.code-content .keyword { color: #333333; font-weight: bold; }
+.code-content .function { color: #555555; }
+.code-content .string { color: #777777; }
+.code-content .comment { color: #999999; font-style: italic; }
+.code-content .number { color: #444444; }
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 1100px) {
